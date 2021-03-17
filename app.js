@@ -1,4 +1,5 @@
 require('dotenv').config()
+require('colors')
 
 const { pause, inquirerMenu, readInput, listPlaces } = require('./helpers/inquirer')
 const Searches = require('./models/searches')
@@ -22,26 +23,32 @@ const main = async() =>{
         
         // Select the place
         const idSelected = await listPlaces(places);
+        if(idSelected == '0') continue;
+
         placeSelected = places.find(l => l.id === idSelected)
+
+        searches.addHistorial(placeSelected.name)
+
         // weather
+        weather = await searches.getWeather(placeSelected.latitude, placeSelected.longitude);
+
         // show results
-        
+        console.clear();
         console.log("\nCity information\n");
-        console.log('City:', placeSelected.name);
+        console.log('City:', placeSelected.name.green);
         console.log('Latitude:', placeSelected.latitude);
         console.log('Longitude:', placeSelected.longitude);
-        console.log('Tempeture:',);
-        console.log('Mín:',);
-        console.log('Máx:', );
+        console.log('Tempeture:', searches.formatTempeture(weather.temp));
+        console.log('Mín:',searches.formatTempeture(weather.temp_min));
+        console.log('Máx:', searches.formatTempeture(weather.temp_max));
+        console.log('Description:', weather.description.cyan);
       break;
     
       case 2:
-      console.log("opcion 2");
-
-      break;
-
-      case 3:
-
+        searches.history.forEach( (place, id) => {
+          const idx = `${id + 1}.`.green;
+          console.log(`${idx} ${place}`);
+        })
       break;
     }
 
